@@ -4,7 +4,13 @@
 #include <Wire.h>
 #include <VL53L0X.h>
 
+#include "movement.h"
+#include "fsm.h"
+
 #define LED 16
+#define LED_RIGHT 21
+#define LED_LEFT 22
+
 #define AIN1 4
 #define AIN2 5
 #define BIN1 8
@@ -16,6 +22,8 @@
 
 #define Address_Right 0x31
 #define Address_Left 0x33
+
+#define Button_Init 20
 
 VL53L0X tof;
 VL53L0X tof_right;
@@ -33,15 +41,94 @@ unsigned long interval;
 unsigned long currentMicros, previousMicros;
 int loop_count;
 
+
+/* Encoder Variables */
+// LEFT Motor
+const byte encoder0pinA = 7;//A pin -> the interrupt pin 0 left
+const byte encoder0pinB = 6;//B pin -> the digital pin 3 left
+byte encoder0PinALast;
+int durationLeft;//the number of the pulses
+boolean DirectionLeft;//the rotation direction
+//RIGHT Motor
+const byte encoder1pinA = 2;//A pin -> the interrupt pin 0 left
+const byte encoder1pinB = 3;//B pin -> the digital pin 3 left
+byte encoder1PinALast;
+int durationRight;//the number of the pulses
+boolean DirectionRight;//the rotation direction
+
 void forward();
 void stop();
 void backwards();
 
+fsm_t OperationMode;
+fsm_t LED_DIRECTION;
+int stateOperationMode = 0, stateLED_DIRECTION = 0;
+int ButtonInit = 0, prev_ButtonInit = 0;
+
+void wheelSpeedLeft();
+void wheelSpeedRight();
+void EncoderInit()
+{
+  DirectionLeft = true;//default -> Forward
+  pinMode(encoder0pinB,INPUT);
+  attachInterrupt(digitalPinToInterrupt(encoder0pinA), wheelSpeedLeft, CHANGE);
+
+  DirectionRight = true;
+  pinMode(encoder1pinB, INPUT);
+  attachInterrupt(digitalPinToInterrupt(encoder1pinA), wheelSpeedRight, CHANGE);
+}
+void wheelSpeedLeft()
+{
+  int Lstate = digitalRead(encoder0pinA);
+  if((encoder0PinALast == LOW) && Lstate==HIGH)
+  {
+    int val = digitalRead(encoder0pinB);
+    if(val == LOW && DirectionLeft)
+    {
+      DirectionLeft = false; //Reverse
+    }
+    else if(val == HIGH && !DirectionLeft)
+    {
+      DirectionLeft = true;  //Forward
+    }
+  }
+  encoder0PinALast = Lstate;
+
+  if(!DirectionLeft)  durationLeft++;
+  else  durationLeft--;
+}
+void wheelSpeedRight()
+{
+  int Lstate = digitalRead(encoder1pinA);
+  if((encoder1PinALast == LOW) && Lstate==HIGH)
+  {
+    int val = digitalRead(encoder1pinB);
+    if(val == LOW && DirectionRight)
+    {
+      DirectionRight = false; //Reverse
+    }
+    else if(val == HIGH && !DirectionRight)
+    {
+      DirectionRight = true;  //Forward
+    }
+  }
+  encoder1PinALast = Lstate;
+
+  if(!DirectionRight)  durationRight++;
+  else  durationRight--;
+}
+
+
 void setup() 
 {
+
+   EncoderInit();
+
   pinMode(XSHUT_Front, OUTPUT);
   pinMode(XSHUT_Right, OUTPUT);
   pinMode(XSHUT_Left, OUTPUT);
+
+  pinMode(Button_Init, INPUT);
 
   digitalWrite(XSHUT_Front, LOW);
   digitalWrite(XSHUT_Right, LOW);
@@ -55,9 +142,6 @@ void setup()
   Wire.setSCL(13);  
 
   Wire.begin();
-
-
-
 
   digitalWrite(XSHUT_Front, HIGH); 
 
@@ -86,7 +170,7 @@ void setup()
 
   tof_left.setTimeout(500);
   while (!tof_left.init()){
-    Serial.println(F("Failed to detect and initialize VL53L0X! RIGHT"));
+    Serial.println(F("Failed to detect and initialize VL53L0X! LEFT"));
     delay(100);
   }
 
@@ -104,11 +188,18 @@ void setup()
   //WiFi.begin
 
   pinMode(LED, OUTPUT);
+  pinMode(LED_RIGHT, OUTPUT);
+  pinMode(LED_LEFT, OUTPUT);
 
   pinMode(AIN1,OUTPUT);
   pinMode(AIN2,OUTPUT);
   pinMode(BIN1,OUTPUT);
   pinMode(BIN2,OUTPUT);
+
+
+
+  set_state(OperationMode, 0);
+  set_state(LED_DIRECTION, 0);
 }
 
 #define CYW43_WL_GPIO_LED_PIN 0
@@ -116,24 +207,35 @@ void setup()
 void loop() 
 {
   currentMicros = micros();
-
   // THE Control Loop
   if (currentMicros - previousMicros >= interval) {
     previousMicros = currentMicros;
+
+    teste();
+
+    //read inputs
+    prev_ButtonInit = ButtonInit;    
+    ButtonInit = !digitalRead(Button_Init);
+
+    //calculate next state
+    operationmode_calc_next_state(OperationMode, ButtonInit, prev_ButtonInit);
+
+    //update state
+    set_state(OperationMode, OperationMode.state_new);
+
+    // Actions set by the current state
+    operationmode_calc_outputs(OperationMode);
+
+    //Update the outputs
 
     if (tof.readRangeAvailable()) {
       prev_distance = distance;
       distance = tof.readRangeMillimeters() * 1e-3;
     }
-
-    //new
-
-    
     if (tof_right.readRangeAvailable()){
       prev_distance_right = distance_right;
       distance_right = tof_right.readRangeMillimeters() * 1e-3;
     }
-
     if (tof_left.readRangeAvailable()){
       prev_distance_left = distance_left;
       distance_left = tof_left.readRangeMillimeters() * 1e-3;
@@ -142,11 +244,22 @@ void loop()
  
     // Start new distance measure
     tof.startReadRangeMillimeters(); 
-
-    //new
     tof_right.startReadRangeMillimeters();
     tof_left.startReadRangeMillimeters();
     
+
+    /* Left ENCODER */
+    Serial.print("Left Speed:");
+    Serial.println(durationLeft);
+    durationLeft = 0;
+    //delay(100);
+    /* Right ENCODER */
+    Serial.print("Right Speed:");
+    Serial.println(durationRight);
+    durationRight = 0;
+    //delay(100);
+
+
 
     Serial.print(" Dist:: ");
     Serial.print(distance*100, 3);
@@ -160,57 +273,41 @@ void loop()
     Serial.print(distance_left*100 - (8-5), 3);
     Serial.println();
 
-    
-    if(distance*100 > 10){
-      digitalWrite(LED, 1);
-      forward();
+    if(OperationMode.state == 1){
+      if(distance*100 > 25){
+        digitalWrite(LED, HIGH);
+        forward();
+      }
+      else{  
+        digitalWrite(LED, LOW);
+        stop();
+      }
     }
-    else{  
-      digitalWrite(LED, 0);
-      stop();
+    else if(OperationMode.state == 0){
+        digitalWrite(LED, LOW);
+        stop();
     }
+
+
+    if(distance){
+      //
+    }
+
+    if(distance_right*100 < 25){
+      digitalWrite(LED_RIGHT, HIGH);
+    }
+    else{
+      digitalWrite(LED_RIGHT, LOW);
+    }
+
+    if(distance_left*100 < 25){
+       digitalWrite(LED_LEFT, HIGH);
+    }
+    else{
+      digitalWrite(LED_LEFT, LOW);
+    }
+
 
   }
 }
 
-
-
-void forward(){
-  Serial.println("Forward");
-  digitalWrite(AIN1,HIGH); 
-  digitalWrite(AIN2,LOW);
-  digitalWrite(BIN1,HIGH); 
-  digitalWrite(BIN2,LOW);
-}
-
-void stop(){
-  Serial.println("Stop");
-  digitalWrite(AIN1,LOW); 
-  digitalWrite(AIN2,LOW);
-  digitalWrite(BIN1,LOW); 
-  digitalWrite(BIN2,LOW);
-}
-
-void backwards(){
-  Serial.println("Backwards");
-  digitalWrite(AIN1,LOW); 
-  digitalWrite(AIN2,HIGH);
-  digitalWrite(BIN1,LOW); 
-  digitalWrite(BIN2,HIGH);
-}
-
-void right(){
-  Serial.println("Right");
-  digitalWrite(AIN1,HIGH); 
-  digitalWrite(AIN2,LOW);
-  digitalWrite(BIN1,LOW); 
-  digitalWrite(BIN2,HIGH);
-}
-
-void left(){
-  Serial.println("Left");
-  digitalWrite(AIN1,LOW); 
-  digitalWrite(AIN2,HIGH);
-  digitalWrite(BIN1,HIGH); 
-  digitalWrite(BIN2,LOW);
-}
