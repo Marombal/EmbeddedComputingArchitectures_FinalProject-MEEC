@@ -45,6 +45,7 @@ void stop();
 void backwards();
 
 fsm_t OperationMode;
+fsm_t MovementMode;
 fsm_t LED_DIRECTION;
 int stateOperationMode = 0, stateLED_DIRECTION = 0;
 int ButtonInit = 0, prev_ButtonInit = 0;
@@ -106,7 +107,7 @@ void wheelSpeedRight()
 void setup() 
 {
 
-   EncoderInit();
+  EncoderInit();
 
   pinMode(XSHUT_Front, OUTPUT);
   pinMode(XSHUT_Right, OUTPUT);
@@ -183,6 +184,7 @@ void setup()
 
 
   set_state(OperationMode, 0);
+  set_state(MovementMode, 0);
   set_state(LED_DIRECTION, 0);
 }
 
@@ -198,22 +200,13 @@ void loop()
     unsigned long cur_time = millis();
     OperationMode.tis = cur_time - OperationMode.tes;
 
-    //read inputs
+    /* READ INPUTS */
+
+    // Read Button
     prev_ButtonInit = ButtonInit;    
     ButtonInit = !digitalRead(Button_Init);
 
-    //calculate next state
-    operationmode_calc_next_state(OperationMode, ButtonInit, prev_ButtonInit);
-
-    //update state
-    set_state(OperationMode, OperationMode.state_new);
-
-    // Actions set by the current state
-    operationmode_calc_outputs(OperationMode);
-
-    //Update the outputs
-    outputs();
-
+    // Read Sensors (ToF)
     if (tof.readRangeAvailable()) {
       prev_distance = distance;
       distance = tof.readRangeMillimeters() * 1e-3;
@@ -226,6 +219,23 @@ void loop()
       prev_distance_left = distance_left;
       distance_left = tof_left.readRangeMillimeters() * 1e-3;
     }
+
+    //calculate next state
+    operationmode_calc_next_state(OperationMode, ButtonInit, prev_ButtonInit);
+    movementmode_calc_next_state(MovementMode, OperationMode, distance*100);
+
+    //update state
+    set_state(OperationMode, OperationMode.state_new);
+    set_state(MovementMode, MovementMode.state_new);
+
+    // Actions set by the current state
+    operationmode_calc_outputs(OperationMode);
+    movementmode_calc_outputs(MovementMode);
+
+    //Update the outputs
+    outputs();
+
+
     
  
     // Start new distance measure
@@ -259,17 +269,6 @@ void loop()
     Serial.print(distance_left*100 - (8-5), 3);
     Serial.println();
 
-    if(OperationMode.state == 1){
-      if(distance*100 > 25){
-        forward();
-      }
-      else{  
-        stop();
-      }
-    }
-    else if(OperationMode.state == 0){
-        stop();
-    }
 
   }
 }

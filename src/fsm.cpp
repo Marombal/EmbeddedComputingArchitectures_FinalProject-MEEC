@@ -48,6 +48,43 @@ void operationmode_calc_outputs(fsm_t& OperationMode){
 
 }
 
+void movementmode_calc_next_state(fsm_t& MovementMode, fsm_t& OperationMode, int SF){
+  if((MovementMode.state == 0) && (OperationMode.state == 1)){
+    MovementMode.state_new = 1;
+  }
+  else if((MovementMode.state == 1) && (OperationMode.state != 1)){
+    MovementMode.state_new = 0;
+  }
+  else if((MovementMode.state == 1) && SF > 25){
+    MovementMode.state_new = 2;
+  }
+  else if((MovementMode.state == 2) && (OperationMode.state != 1)){
+    MovementMode.state_new = 0;
+  }
+    else if((MovementMode.state == 2) && SF <= 25){
+    MovementMode.state_new = 1;
+  }
+}
+
+void movementmode_calc_outputs(fsm_t& MovementMode){
+  if(MovementMode.state == 0){
+    stop();
+  }
+  else if(MovementMode.state == 1){
+    stop();
+    LF = HIGH;
+    LR = HIGH;
+    LL = HIGH;
+  }
+  else if(MovementMode.state == 2){
+    forward();
+    LF = HIGH;
+    LR = LOW;
+    LL = LOW;
+  }
+
+}
+
 void outputs(){
   digitalWrite(LED, LF);
   digitalWrite(LED_RIGHT, LR);

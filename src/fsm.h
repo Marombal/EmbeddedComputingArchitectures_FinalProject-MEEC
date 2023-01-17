@@ -16,6 +16,8 @@ typedef struct{
 void set_state(fsm_t &fsm, int state_new);
 void operationmode_calc_next_state(fsm_t& OperationMode, int b, int prev_b);
 void operationmode_calc_outputs(fsm_t& OperationMode);
+void movementmode_calc_next_state(fsm_t& MovementMode, fsm_t& OperationMode, int SF);
+void movementmode_calc_outputs(fsm_t& MovementMode);
 void outputs();
 
 #endif
