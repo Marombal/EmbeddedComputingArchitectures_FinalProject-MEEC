@@ -6,24 +6,8 @@
 
 #include "movement.h"
 #include "fsm.h"
+#include "defines.h"
 
-#define LED 16
-#define LED_RIGHT 21
-#define LED_LEFT 22
-
-#define AIN1 4
-#define AIN2 5
-#define BIN1 8
-#define BIN2 9
-
-#define XSHUT_Front 17
-#define XSHUT_Right 18
-#define XSHUT_Left 19
-
-#define Address_Right 0x31
-#define Address_Left 0x33
-
-#define Button_Init 20
 
 VL53L0X tof;
 VL53L0X tof_right;
@@ -211,7 +195,8 @@ void loop()
   if (currentMicros - previousMicros >= interval) {
     previousMicros = currentMicros;
 
-    teste();
+    unsigned long cur_time = millis();
+    OperationMode.tis = cur_time - OperationMode.tes;
 
     //read inputs
     prev_ButtonInit = ButtonInit;    
@@ -227,6 +212,7 @@ void loop()
     operationmode_calc_outputs(OperationMode);
 
     //Update the outputs
+    outputs();
 
     if (tof.readRangeAvailable()) {
       prev_distance = distance;
@@ -275,38 +261,15 @@ void loop()
 
     if(OperationMode.state == 1){
       if(distance*100 > 25){
-        digitalWrite(LED, HIGH);
         forward();
       }
       else{  
-        digitalWrite(LED, LOW);
         stop();
       }
     }
     else if(OperationMode.state == 0){
-        digitalWrite(LED, LOW);
         stop();
     }
-
-
-    if(distance){
-      //
-    }
-
-    if(distance_right*100 < 25){
-      digitalWrite(LED_RIGHT, HIGH);
-    }
-    else{
-      digitalWrite(LED_RIGHT, LOW);
-    }
-
-    if(distance_left*100 < 25){
-       digitalWrite(LED_LEFT, HIGH);
-    }
-    else{
-      digitalWrite(LED_LEFT, LOW);
-    }
-
 
   }
 }
