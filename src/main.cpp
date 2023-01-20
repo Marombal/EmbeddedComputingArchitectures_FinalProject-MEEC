@@ -46,6 +46,7 @@ void backwards();
 
 fsm_t OperationMode;
 fsm_t MovementMode;
+fsm_t FindWallMode;
 fsm_t LED_DIRECTION;
 int stateOperationMode = 0, stateLED_DIRECTION = 0;
 int ButtonInit = 0, prev_ButtonInit = 0;
@@ -183,9 +184,10 @@ void setup()
 
 
 
-  set_state(OperationMode, 0);
-  set_state(MovementMode, 0);
-  set_state(LED_DIRECTION, 0);
+  set_state(OperationMode, START);
+  set_state(MovementMode, START);
+  set_state(FindWallMode, START);
+  set_state(LED_DIRECTION, START);
 }
 
 #define CYW43_WL_GPIO_LED_PIN 0
@@ -230,17 +232,37 @@ void loop()
     //calculate next state
     operationmode_calc_next_state(OperationMode, ButtonInit, prev_ButtonInit);
     movementmode_calc_next_state(MovementMode, OperationMode, distance*100);
+    findWallMode_calc_next_state(FindWallMode, OperationMode, distance*100, distance_left*100, distance_right*100);
 
     //update state
     set_state(OperationMode, OperationMode.state_new);
     set_state(MovementMode, MovementMode.state_new);
+    set_state(FindWallMode, FindWallMode.state_new);
 
     // Actions set by the current state
     operationmode_calc_outputs(OperationMode);
     movementmode_calc_outputs(MovementMode);
+    findWallMode_calc_outputs(FindWallMode);
 
-    //Update the outputs
+    // Update the outputs
     outputs();
+
+    if(MovementMode.state == 2){
+      if((distance_left*100 <= 15) && (distance_left*100 >= 10)){
+        forward();
+        Serial.println("forward");
+      }
+      else if(distance_left*100 > 15){
+        ajust_left();
+        Serial.println("ajust_left");
+      }
+      else if(distance_left*100 < 10){
+        ajust_right();
+        Serial.println("ajust_right");
+      }
+    }
+
+
 
 
     // Serial Prints (For debug and control prupose)
@@ -251,19 +273,11 @@ void loop()
     Serial.print("Right Speed:");    Serial.println(durationRight);
     durationRight = 0;
 
+    Serial.print(" Dist FRONT: ");    Serial.println(distance*100, 3);
+    Serial.print(" Dist RIGHT : ");    Serial.println(distance_right*100, 3);
+    Serial.print(" Dist LEFT : ");    Serial.println(distance_left*100, 3);
 
-    Serial.print(" Dist:: ");
-    Serial.print(distance*100, 3);
-    Serial.println();
-
-    Serial.print(" Dist RIGHT : ");
-    Serial.print(distance_right*100 - (8.5-5), 3);
-    Serial.println();
-
-    Serial.print(" Dist LEFT : ");
-    Serial.print(distance_left*100 - (8-5), 3);
-    Serial.println();
-
+    Serial.print("State FindWallMode: "); Serial.println(FindWallMode.state);
 
   }
 }

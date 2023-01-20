@@ -27,4 +27,25 @@
 /* OUTPUTS LED CONTROL*/
 static volatile boolean LF, LR, LL;
 
+/* Speed Modes */
+#define MAX_SPEED 255
+#define MIN_SPEED 0
+
+/* STATES GERAL */
+#define START 0
+
+/* STATES 'operationMode' */
+#define OFF_LEDS_OFF 0
+#define OFF_LEDS_ON 2
+#define ON 1
+
+/* STATES 'movementMode' */
+#define STOP 1
+#define MOVE 2
+
+/* STATES 'findWallMode' */
+#define FOLLOW_LEFT 1
+#define FOLLOW_RIGHT 2
+#define MOVE_STRAIGHT 3
+
 #endif

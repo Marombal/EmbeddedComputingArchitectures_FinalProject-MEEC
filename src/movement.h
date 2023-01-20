@@ -23,5 +23,7 @@ void stop();
 void backwards();
 void right();
 void left();
+void ajust_right();
+void ajust_left();
 
 #endif
