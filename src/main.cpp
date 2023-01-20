@@ -220,6 +220,13 @@ void loop()
       distance_left = tof_left.readRangeMillimeters() * 1e-3;
     }
 
+    
+    // Start new distance measure
+    tof.startReadRangeMillimeters(); 
+    tof_right.startReadRangeMillimeters();
+    tof_left.startReadRangeMillimeters();
+    
+
     //calculate next state
     operationmode_calc_next_state(OperationMode, ButtonInit, prev_ButtonInit);
     movementmode_calc_next_state(MovementMode, OperationMode, distance*100);
@@ -236,25 +243,13 @@ void loop()
     outputs();
 
 
-    
- 
-    // Start new distance measure
-    tof.startReadRangeMillimeters(); 
-    tof_right.startReadRangeMillimeters();
-    tof_left.startReadRangeMillimeters();
-    
-
+    // Serial Prints (For debug and control prupose)
     /* Left ENCODER */
-    Serial.print("Left Speed:");
-    Serial.println(durationLeft);
+    Serial.print("Left Speed:");    Serial.println(durationLeft);
     durationLeft = 0;
-    //delay(100);
     /* Right ENCODER */
-    Serial.print("Right Speed:");
-    Serial.println(durationRight);
+    Serial.print("Right Speed:");    Serial.println(durationRight);
     durationRight = 0;
-    //delay(100);
-
 
 
     Serial.print(" Dist:: ");
