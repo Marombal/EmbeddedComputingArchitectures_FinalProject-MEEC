@@ -42,6 +42,8 @@ static volatile boolean LF, LR, LL;
 /* STATES 'movementMode' */
 #define STOP 1
 #define MOVE 2
+#define MOVEMENT_RIGHT 3
+#define MOVEMENT_LEFT 4
 
 /* STATES 'findWallMode' */
 #define FOLLOW_LEFT 1

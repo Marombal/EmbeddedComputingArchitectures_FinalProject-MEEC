@@ -34,21 +34,18 @@ void operationmode_calc_outputs(fsm_t& OperationMode){
     LF = LOW;
     LR = LOW;
     LL = LOW;
-    Serial.println("STATE 0 - Desligado");
   }
   else if(OperationMode.state == ON){
-    Serial.println("STATE 1 - Ligado");
   }
   else if(OperationMode.state == OFF_LEDS_ON){
     LF = HIGH;
     LR = HIGH;
     LL = HIGH;
-    Serial.println("STATE 2 - Desligado");
   }
 
 }
 
-void movementmode_calc_next_state(fsm_t& MovementMode, fsm_t& OperationMode, int SF){
+void movementmode_calc_next_state(fsm_t& MovementMode, fsm_t& OperationMode, fsm_t& FindWallMode,int SF){
   if((MovementMode.state == START) && (OperationMode.state == ON)){
     MovementMode.state_new = STOP;
   }
@@ -64,23 +61,73 @@ void movementmode_calc_next_state(fsm_t& MovementMode, fsm_t& OperationMode, int
   else if((MovementMode.state == MOVE) && SF <= 25){
     MovementMode.state_new = STOP;
   }
+  else if((MovementMode.state == MOVE) && (FindWallMode.state == FOLLOW_RIGHT)){
+    MovementMode.state_new = MOVEMENT_RIGHT;
+  }
+  else if((MovementMode.state == MOVE) && (FindWallMode.state == FOLLOW_LEFT)){
+    MovementMode.state_new = MOVEMENT_LEFT;
+  }
+  else if((MovementMode.state == MOVE) && (FindWallMode.state == MOVE_STRAIGHT)){
+    MovementMode.state_new = MOVE;
+  }
+  else if((MovementMode.state == MOVEMENT_RIGHT) && (OperationMode.state != ON)){
+    MovementMode.state_new = START;
+  }
+  else if((MovementMode.state == MOVEMENT_RIGHT) && SF <= 25){
+    MovementMode.state_new = STOP;
+  }
+  else if((MovementMode.state == MOVEMENT_LEFT) && (OperationMode.state != ON)){
+    MovementMode.state_new = START;
+  }
+  else if((MovementMode.state == MOVEMENT_LEFT) && SF <= 25){
+    MovementMode.state_new = STOP;
+  }
+
 }
 
-void movementmode_calc_outputs(fsm_t& MovementMode){
-  if(MovementMode.state == 0){
+void movementmode_calc_outputs(fsm_t& MovementMode, int SL, int SR){
+  if(MovementMode.state == START){
     stop();
   }
-  else if(MovementMode.state == 1){
+  else if(MovementMode.state == STOP){
     stop();
     LF = HIGH;
     LR = HIGH;
     LL = HIGH;
   }
-  else if(MovementMode.state == 2){
-    // teste forward();
+  else if(MovementMode.state == MOVE){
+    forward();
     LF = HIGH;
     LR = LOW;
     LL = LOW;
+  }
+  else if(MovementMode.state == MOVEMENT_RIGHT){
+    if(SR <= 18 && SR >= 15){
+      forward();
+      Serial.println(" FORWARD");
+    }
+    else if(SR > 18){
+      ajust_right();
+      Serial.println(" ajust_right");
+    }
+    else if(SR < 15){
+      ajust_left();
+      Serial.println(" ajust_left");
+    }
+  }
+  else if(MovementMode.state == MOVEMENT_LEFT){
+    if(SL <= 12 && SL >= 10){
+      forward();
+      Serial.println(" FORWARD");
+    }
+    else if(SL > 12){
+      ajust_left();
+      Serial.println(" ajust_left");
+    }
+    else if(SL < 10){
+      ajust_right();
+      Serial.println(" ajust_right");
+    }
   }
 
 }

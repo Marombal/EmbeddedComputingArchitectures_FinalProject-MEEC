@@ -43,6 +43,7 @@ boolean DirectionRight;//the rotation direction
 void forward();
 void stop();
 void backwards();
+void serialprints();
 
 fsm_t OperationMode;
 fsm_t MovementMode;
@@ -231,7 +232,7 @@ void loop()
 
     //calculate next state
     operationmode_calc_next_state(OperationMode, ButtonInit, prev_ButtonInit);
-    movementmode_calc_next_state(MovementMode, OperationMode, distance*100);
+    movementmode_calc_next_state(MovementMode, OperationMode, FindWallMode, distance*100);
     findWallMode_calc_next_state(FindWallMode, OperationMode, distance*100, distance_left*100, distance_right*100);
 
     //update state
@@ -241,31 +242,12 @@ void loop()
 
     // Actions set by the current state
     operationmode_calc_outputs(OperationMode);
-    movementmode_calc_outputs(MovementMode);
+    movementmode_calc_outputs(MovementMode, distance_left*100, distance_right*100);
     findWallMode_calc_outputs(FindWallMode);
 
     // Update the outputs
     outputs();
 
-    if(MovementMode.state == 2){
-      if((distance_left*100 <= 15) && (distance_left*100 >= 10)){
-        forward();
-        Serial.println("forward");
-      }
-      else if(distance_left*100 > 15){
-        ajust_left();
-        Serial.println("ajust_left");
-      }
-      else if(distance_left*100 < 10){
-        ajust_right();
-        Serial.println("ajust_right");
-      }
-    }
-
-
-
-
-    // Serial Prints (For debug and control prupose)
     /* Left ENCODER */
     Serial.print("Left Speed:");    Serial.println(durationLeft);
     durationLeft = 0;
@@ -273,12 +255,28 @@ void loop()
     Serial.print("Right Speed:");    Serial.println(durationRight);
     durationRight = 0;
 
+    // Serial Prints (For debug and control prupose)
+    serialprints();
+    
+  }
+}
+
+
+void serialprints(){
+    // Serial Prints (For debug and control prupose)
+
+
     Serial.print(" Dist FRONT: ");    Serial.println(distance*100, 3);
     Serial.print(" Dist RIGHT : ");    Serial.println(distance_right*100, 3);
     Serial.print(" Dist LEFT : ");    Serial.println(distance_left*100, 3);
 
+    Serial.print("State OperationMode: "); Serial.println(OperationMode.state);
+    Serial.print("State MovementMode: "); Serial.print(MovementMode.state);
+    if(MovementMode.state == STOP) Serial.println(" STOP");
+    else if(MovementMode.state == START) Serial.println(" START");
+    else if(MovementMode.state == MOVE) Serial.println(" MOVE");
+    else if(MovementMode.state == MOVEMENT_RIGHT) Serial.println(" MOVEMENT_RIGHT");
+    else if(MovementMode.state == MOVEMENT_LEFT) Serial.println(" MOVEMENT_LEFT");
     Serial.print("State FindWallMode: "); Serial.println(FindWallMode.state);
-
-  }
 }
 
