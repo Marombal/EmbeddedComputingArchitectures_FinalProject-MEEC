@@ -28,14 +28,14 @@ int loop_count;
 
 /* Encoder Variables */
 // LEFT Motor
-const byte encoder0pinA = 7;//A pin -> the interrupt pin 0 left
-const byte encoder0pinB = 6;//B pin -> the digital pin 3 left
+//const byte encoder0pinA = 7;//A pin -> the interrupt pin 0 left
+//const byte encoder0pinB = 6;//B pin -> the digital pin 3 left
 byte encoder0PinALast;
 int durationLeft;//the number of the pulses
 boolean DirectionLeft;//the rotation direction
 //RIGHT Motor
-const byte encoder1pinA = 2;//A pin -> the interrupt pin 0 left
-const byte encoder1pinB = 3;//B pin -> the digital pin 3 left
+//const byte encoder1pinA = 2;//A pin -> the interrupt pin 0 left
+//const byte encoder1pinB = 3;//B pin -> the digital pin 3 left
 byte encoder1PinALast;
 int durationRight;//the number of the pulses
 boolean DirectionRight;//the rotation direction

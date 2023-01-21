@@ -11,6 +11,10 @@
 #define AIN2 5
 #define BIN1 8
 #define BIN2 9
+#define encoder0pinA 7
+#define encoder0pinB 6
+#define encoder1pinA 2
+#define encoder1pinB 3
 
 /* SENSOR CONTROL PINS */
 #define XSHUT_Front 17
