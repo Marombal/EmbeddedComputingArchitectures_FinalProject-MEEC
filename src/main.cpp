@@ -232,7 +232,7 @@ void loop()
 
     //calculate next state
     operationmode_calc_next_state(OperationMode, ButtonInit, prev_ButtonInit);
-    movementmode_calc_next_state(MovementMode, OperationMode, FindWallMode, distance*100);
+    movementmode_calc_next_state(MovementMode, OperationMode, FindWallMode, distance*100, distance_right*100, distance_left*100);
     findWallMode_calc_next_state(FindWallMode, OperationMode, distance*100, distance_left*100, distance_right*100);
 
     //update state

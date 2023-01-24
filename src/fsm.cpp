@@ -45,8 +45,11 @@ void operationmode_calc_outputs(fsm_t& OperationMode){
 
 }
 
-void movementmode_calc_next_state(fsm_t& MovementMode, fsm_t& OperationMode, fsm_t& FindWallMode,int SF){
-  if((MovementMode.state == START) && (OperationMode.state == ON)){
+void movementmode_calc_next_state(fsm_t& MovementMode, fsm_t& OperationMode, fsm_t& FindWallMode, int SF, int SR, int SL){
+  if(OperationMode.state != ON){
+    MovementMode.state_new = START;
+  }
+  else if((MovementMode.state == START) && (OperationMode.state == ON)){
     MovementMode.state_new = STOP;
   }
   else if((MovementMode.state == STOP) && (OperationMode.state != ON)){
@@ -74,9 +77,15 @@ void movementmode_calc_next_state(fsm_t& MovementMode, fsm_t& OperationMode, fsm
     MovementMode.state_new = START;
   }
   else if((MovementMode.state == MOVEMENT_RIGHT) && SF <= 35){
-    MovementMode.state_new = TURN_LEFT;
+    MovementMode.state_new = TURN_LEFT_CORNER;
   }
-  else if((MovementMode.state == TURN_LEFT) && SF > 35){
+  else if((MovementMode.state == MOVE_STRAIGHT) && SR >= 60){
+    MovementMode.state_new = TURN_RIGHT;
+  }
+  else if((MovementMode.state == TURN_LEFT_CORNER) && SF > 35){
+    MovementMode.state_new = MOVEMENT_RIGHT;
+  }
+  else if((MovementMode.state == TURN_RIGHT) && SR < 60){
     MovementMode.state_new = MOVEMENT_RIGHT;
   }
   //else if((MovementMode.state == MOVEMENT_RIGHT) && SF <= 25){
@@ -86,9 +95,9 @@ void movementmode_calc_next_state(fsm_t& MovementMode, fsm_t& OperationMode, fsm
     MovementMode.state_new = START;
   }
   else if((MovementMode.state == MOVEMENT_LEFT) && SF <= 35){
-    MovementMode.state_new = TURN_RIGHT;
+    MovementMode.state_new = TURN_RIGHT_CORNER;
   }
-  else if((MovementMode.state == TURN_RIGHT) && SF > 35){
+  else if((MovementMode.state == TURN_RIGHT_CORNER) && SF > 35){
     MovementMode.state_new = MOVEMENT_LEFT;
   }
   /*else if((MovementMode.state == MOVEMENT_LEFT) && SF <= 25){
@@ -141,13 +150,17 @@ void movementmode_calc_outputs(fsm_t& MovementMode, int SL, int SR){
       Serial.println(" ajust_right");
     }
   }
-  else if(MovementMode.state == TURN_LEFT){
+  else if(MovementMode.state == TURN_LEFT_CORNER){
     turn_left();
     Serial.println(" turn_left");
   }
-  else if(MovementMode.state == TURN_RIGHT){
+  else if(MovementMode.state == TURN_RIGHT_CORNER){
     turn_right();
     Serial.println(" turn_right");
+  }
+  else if(MovementMode.state == TURN_RIGHT){
+    turn_right();
+    Serial.println(" turn_right2");
   }
   
 
