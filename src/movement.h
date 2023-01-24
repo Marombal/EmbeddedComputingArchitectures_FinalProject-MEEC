@@ -25,5 +25,7 @@ void right();
 void left();
 void ajust_right();
 void ajust_left();
+void turn_left();
+void turn_right();
 
 #endif

@@ -32,7 +32,7 @@ void stop(){
   digitalWrite(BIN2,LOW);
 }
 
-void backwards(){
+/*void backwards(){
   Serial.println("Backwards");
   digitalWrite(AIN1,LOW); 
   digitalWrite(AIN2,HIGH);
@@ -54,7 +54,7 @@ void left(){
   digitalWrite(AIN2,HIGH);
   digitalWrite(BIN1,HIGH); 
   digitalWrite(BIN2,LOW);
-}
+}*/
 
 void ajust_right(){
   analogWrite(AIN1, MAX_SPEED - 50);
@@ -68,4 +68,18 @@ void ajust_left(){
   analogWrite(AIN2, MIN_SPEED);
   analogWrite(BIN1, MIN_SPEED);
   analogWrite(BIN2, MAX_SPEED - 50);
+}
+
+void turn_left(){
+  analogWrite(AIN1, MAX_SPEED);
+  analogWrite(AIN2, MIN_SPEED);
+  analogWrite(BIN1, MIN_SPEED);
+  analogWrite(BIN2, MIN_SPEED);
+}
+
+void turn_right(){
+  analogWrite(AIN1, MIN_SPEED);
+  analogWrite(AIN2, MIN_SPEED);
+  analogWrite(BIN1, MIN_SPEED);
+  analogWrite(BIN2, MAX_SPEED);
 }
