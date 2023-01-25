@@ -79,7 +79,7 @@ void movementmode_calc_next_state(fsm_t& MovementMode, fsm_t& OperationMode, fsm
   else if((MovementMode.state == MOVEMENT_RIGHT) && SF <= 35){
     MovementMode.state_new = TURN_LEFT_CORNER;
   }
-  else if((MovementMode.state == MOVE_STRAIGHT) && SR >= 60){
+  else if((MovementMode.state == MOVEMENT_RIGHT) && SR >= 60){ //WARNING
     MovementMode.state_new = TURN_RIGHT;
   }
   else if((MovementMode.state == TURN_LEFT_CORNER) && SF > 35){
@@ -88,9 +88,6 @@ void movementmode_calc_next_state(fsm_t& MovementMode, fsm_t& OperationMode, fsm
   else if((MovementMode.state == TURN_RIGHT) && SR < 60){
     MovementMode.state_new = MOVEMENT_RIGHT;
   }
-  //else if((MovementMode.state == MOVEMENT_RIGHT) && SF <= 25){
-    //MovementMode.state_new = STOP;
-  //}
   else if((MovementMode.state == MOVEMENT_LEFT) && (OperationMode.state != ON)){
     MovementMode.state_new = START;
   }
@@ -100,9 +97,12 @@ void movementmode_calc_next_state(fsm_t& MovementMode, fsm_t& OperationMode, fsm
   else if((MovementMode.state == TURN_RIGHT_CORNER) && SF > 35){
     MovementMode.state_new = MOVEMENT_LEFT;
   }
-  /*else if((MovementMode.state == MOVEMENT_LEFT) && SF <= 25){
-    MovementMode.state_new = STOP;
-  }*/
+  else if((MovementMode.state == MOVEMENT_LEFT) && SL >= 60){
+    MovementMode.state_new = TURN_LEFT;
+  }
+  else if((MovementMode.state == TURN_LEFT) && SL < 60){
+    MovementMode.state_new = MOVEMENT_LEFT;
+  }
 
 }
 
@@ -162,7 +162,10 @@ void movementmode_calc_outputs(fsm_t& MovementMode, int SL, int SR){
     turn_right();
     Serial.println(" turn_right2");
   }
-  
+  else if(MovementMode.state == TURN_LEFT){
+    turn_left();
+    Serial.println(" turn_left2");
+  }
 
 }
 

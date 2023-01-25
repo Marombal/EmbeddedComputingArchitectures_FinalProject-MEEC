@@ -26,10 +26,10 @@ void forward(){
 
 void stop(){
   Serial.println("Stop");
-  digitalWrite(AIN1,LOW); 
-  digitalWrite(AIN2,LOW);
-  digitalWrite(BIN1,LOW); 
-  digitalWrite(BIN2,LOW);
+  analogWrite(AIN1,MIN_SPEED); 
+  analogWrite(AIN2,MIN_SPEED);
+  analogWrite(BIN1,MIN_SPEED); 
+  analogWrite(BIN2,MIN_SPEED);
 }
 
 /*void backwards(){

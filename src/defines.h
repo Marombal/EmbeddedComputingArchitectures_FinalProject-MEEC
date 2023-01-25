@@ -51,6 +51,8 @@ static volatile boolean LF, LR, LL;
 #define TURN_LEFT_CORNER 5
 #define TURN_RIGHT_CORNER 6
 #define TURN_RIGHT 7
+#define TURN_LEFT 8
+
 /* STATES 'findWallMode' */
 #define FOLLOW_LEFT 1
 #define FOLLOW_RIGHT 2

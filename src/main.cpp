@@ -271,7 +271,7 @@ void serialprints(){
     Serial.print(" Dist LEFT : ");    Serial.println(distance_left*100, 3);
 
     Serial.print("State OperationMode: "); Serial.println(OperationMode.state);
-    Serial.print("State MovementMode: "); Serial.print(MovementMode.state);
+    Serial.print("State MovementMode: "); Serial.println(MovementMode.state);
     if(MovementMode.state == STOP) Serial.println(" STOP");
     else if(MovementMode.state == START) Serial.println(" START");
     else if(MovementMode.state == MOVE) Serial.println(" MOVE");
