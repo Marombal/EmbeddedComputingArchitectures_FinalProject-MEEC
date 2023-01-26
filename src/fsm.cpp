@@ -123,29 +123,29 @@ void movementmode_calc_outputs(fsm_t& MovementMode, int SL, int SR){
     LL = LOW;
   }
   else if(MovementMode.state == MOVEMENT_RIGHT){
-    if(SR <= 18 && SR >= 15){
+    if(SR <= 23 && SR >= 22){
       forward();
       Serial.println(" FORWARD");
     }
-    else if(SR > 18){
+    else if(SR > 23){
       ajust_right();
       Serial.println(" ajust_right");
     }
-    else if(SR < 15){
+    else if(SR < 22){
       ajust_left();
       Serial.println(" ajust_left");
     }
   }
   else if(MovementMode.state == MOVEMENT_LEFT){
-    if(SL <= 12 && SL >= 10){
+    if(SL <= 17 && SL >= 16){
       forward();
       Serial.println(" FORWARD");
     }
-    else if(SL > 12){
+    else if(SL > 17){
       ajust_left();
       Serial.println(" ajust_left");
     }
-    else if(SL < 10){
+    else if(SL < 16){
       ajust_right();
       Serial.println(" ajust_right");
     }
