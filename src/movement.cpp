@@ -57,7 +57,7 @@ void left(){
 }*/
 
 void ajust_right(){
-  analogWrite(AIN1, MAX_SPEED - 50);
+  analogWrite(AIN1, MAX_SPEED - 40);
   analogWrite(AIN2, MIN_SPEED);
   analogWrite(BIN1, MIN_SPEED);
   analogWrite(BIN2, MAX_SPEED);
@@ -67,7 +67,7 @@ void ajust_left(){
   analogWrite(AIN1, MAX_SPEED);
   analogWrite(AIN2, MIN_SPEED);
   analogWrite(BIN1, MIN_SPEED);
-  analogWrite(BIN2, MAX_SPEED - 50);
+  analogWrite(BIN2, MAX_SPEED - 40);
 }
 
 void turn_left(){

@@ -182,10 +182,10 @@ void findWallMode_calc_next_state(fsm_t& FindWallMode, fsm_t& OperationMode, int
   else if((FindWallMode.state == START) && SF > 25 && SL > 35 && SR > 35){
     FindWallMode.state_new = MOVE_STRAIGHT;
   }
-  else if((FindWallMode.state == MOVE_STRAIGHT) && SL < SR){
+  else if((FindWallMode.state == MOVE_STRAIGHT) && (SL < SR) && (SL < 50)){
     FindWallMode.state_new = FOLLOW_LEFT;
   }
-  else if((FindWallMode.state == MOVE_STRAIGHT) && SL >= SR){
+  else if((FindWallMode.state == MOVE_STRAIGHT) && (SL >= SR) && (SR < 50)){
     FindWallMode.state_new = FOLLOW_RIGHT;
   }
 }
