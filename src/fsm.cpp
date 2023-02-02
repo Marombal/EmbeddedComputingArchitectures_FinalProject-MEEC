@@ -128,6 +128,7 @@ void movementmode_calc_outputs(fsm_t& MovementMode, int SL, int SR){
     if(SR <= 23 && SR >= 22){
       forward();
       Serial.println(" FORWARD");
+      //teste
     }
     else if(SR > 23){
       ajust_right();

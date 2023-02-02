@@ -200,6 +200,8 @@ void loop()
   if (currentMicros - previousMicros >= interval) {
     previousMicros = currentMicros;
 
+    /* UPDATE TIMERS */
+    
     unsigned long cur_time = millis();
     OperationMode.tis = cur_time - OperationMode.tes;
 
